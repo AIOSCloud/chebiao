@@ -5,7 +5,7 @@ import random
 import base64
 
 app = Flask(__name__)
-DATABASE = 'static/db/car_info.db'
+DATABASE = 'static/db/database.db'
 app.secret_key = 'Breeze Python'
 
 
@@ -20,14 +20,12 @@ def init_db():
 
 
 def connect_db():
-    print("数据库连接")
     return sqlite3.connect(DATABASE)
 
 
 @app.before_request
 def before_request():
     g.db = connect_db()
-    init_db()
 
 
 @app.teardown_request
@@ -50,11 +48,12 @@ def query_db(query, args=()):
 def index():
     id = random.randint(1, 141)
     car_info = query_db('select name,image,founded,models,website from car_info where id={}'.format(id))
-    car_info['image'] = base64.b64encode(car_info['image']).decode('ascii')
+    car_info['image'] = car_info['image']
     print(car_info)
     return render_template('index.html', car=car_info)
 
 
 if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=7000)
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.run(host='127.0.0.1', port=7000)
